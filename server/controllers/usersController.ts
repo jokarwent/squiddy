@@ -1,3 +1,4 @@
+import sha256 from 'sha256'
 import User from '../models/User'
 
 export async function createUser (request: object) {
@@ -9,7 +10,8 @@ export async function createUser (request: object) {
 
     if (!isExisting) {
       if (password === passwordVerification) {
-        let user = await User.create({ name, email, password, adult })
+        let crypted = sha256.x2(password)
+        let user = await User.create({ name, email, password: crypted, adult })
         let saved = await user.save()
 
         if (saved !== undefined) {
@@ -64,9 +66,10 @@ export async function login (email: string, password: string) {
   // and more security
   try {
     let user = await User.findOne({ email })
+    let crypted = sha256.x2(password)
 
     // @ts-ignore
-    if (user.password === password) {
+    if (user.password === crypted) {
       return 'Logged success.'
     } else {
       return 'Password does not match.'

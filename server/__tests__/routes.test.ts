@@ -15,75 +15,75 @@ describe('Testing available Default routes', () => {
 })
 
 describe('Testing available Users routes', () => {
-  test('/user/login Login as Jok', async () => {
+  test('POST - Login as Jok - /user/login ', async () => {
     const response = await request(app.callback())
       .post('/user/login')
-      .send({ email: 'jok@squiddy.io', password: 'nopassword' })
+      .send({ email: 'jok@squiddy.io', password: 'nopassword456' })
     expect(response.text).toEqual('Logged success.')
   })
 
-  test('/user/login Login fail as Free with a fake password', async () => {
+  test('POST - Login fail as Free with a fake password - /user/login - FAIL', async () => {
     const response = await request(app.callback())
       .post('/user/login')
       .send({ email: 'free@squiddy.io', password: 'fakepassword' })
     expect(response.text).toEqual('Password does not match.')
   })
 
-  test('/user/login Login fail as non existing user', async () => {
+  test('POST - Login fail as non existing user - /user/login  - FAIL', async () => {
     const response = await request(app.callback())
       .post('/user/login')
       .send({ email: 'none@none.io', password: 'nonepassword' })
     expect(response.text).toEqual('This user does not exists in our database.')
   })
 
-  test('/user/5e920caa1b8fb91ab1f5c04d Retrieving a user', async () => {
+  test('GET - Retrieving a user - /user/5e920caa1b8fb91ab1f5c04d', async () => {
     const response = await request(app.callback()).get(
       '/user/5e920caa1b8fb91ab1f5c04d'
     )
     expect(response.text).not.toEqual('{}')
   })
 
-  test('/user/0000 Retrieving a non existing user fail', async () => {
+  test('GET - Retrieving a non existing user - /user/0000 - FAIL', async () => {
     const response = await request(app.callback()).get('/user/0000')
     expect(response.text).toEqual('There is not user with that identifier.')
   })
 
-  test('/user/register Try to create a user with the same email fail', async () => {
+  test('POST - Try to create a user with the same email - /user/register  - FAIL', async () => {
     const response = await request(app.callback())
       .post('/user/register')
       .send({
         name: 'Freemaan',
         email: 'free@squiddy.io',
         adult: false,
-        password: 'nopassword',
-        passwordVerification: 'nopassword'
+        password: 'nopassword123',
+        passwordVerification: 'nopassword123'
       })
     expect(response.text).toEqual(
       'A user with the same name or the same email is already existing.'
     )
   })
 
-  test('/user/register Try to create a user with the same name fail', async () => {
+  test('POST - Try to create a user with the same name - /user/register - FAIL', async () => {
     const response = await request(app.callback())
       .post('/user/register')
       .send({
         name: 'JokArwent',
         email: 'jok@squiddy.io',
         adult: true,
-        password: 'nopassword',
-        passwordVerification: 'nopassword'
+        password: 'nopassword456',
+        passwordVerification: 'nopassword456'
       })
     expect(response.text).toEqual(
       'A user with the same name or the same email is already existing.'
     )
   })
 
-  test('/user/register Try to create a user without informations fail', async () => {
+  test('POST - Try to create a user without informations - /user/register - FAIL', async () => {
     const response = await request(app.callback()).post('/user/register')
     expect(response.text).toEqual('Please fill data for user creation.')
   })
 
-  test('/user/register Create a new user', async () => {
+  test('POST - Create a new user - /user/register', async () => {
     const response = await request(app.callback())
       .post('/user/register')
       .send({
@@ -95,7 +95,7 @@ describe('Testing available Users routes', () => {
     expect(response.text).toEqual('The user has been added successfully.')
   })
 
-  test('/user/ Delete a existing user', async () => {
+  test('DELETE - Delete a existing user - /user/', async () => {
     const getUser = await User.findOne({ name: 'RandomDoode' })
     const response = await request(app.callback()).delete(
       '/user/' + getUser?._id
@@ -103,7 +103,7 @@ describe('Testing available Users routes', () => {
     expect(response.text).toEqual('The user has been removed successfully.')
   })
 
-  test('/user/ Try to delete a not existing user fail', async () => {
+  test('DELETE - Try to delete a not existing user - /user/ - FAIL', async () => {
     const response = await request(app.callback()).delete('/user/notexisting')
     expect(response.text).toEqual("There's no user with this identifier.")
   })

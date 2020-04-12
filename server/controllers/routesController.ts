@@ -1,7 +1,6 @@
 import { Context } from 'koa'
 import {
   getUserById,
-  getUserByName,
   createUser,
   deleteUser,
   login
