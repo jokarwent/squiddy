@@ -1,6 +1,6 @@
 import { Context } from 'koa'
 import { getUserById, createUser, deleteUser, login } from './usersController'
-import { getSounds, getSound, getSoundsFromUserId, createSound } from './soundsController'
+import { getSounds, getSound, getSoundsFromUserId, createSound, deleteSound } from './soundsController'
 import User from '../models/User'
 
 // ex: getSounds from 'controller/sound'
@@ -87,6 +87,15 @@ export const soundsRoutes = [
       let request = ctx.request.body
       let sounds = await createSound(request)
       ctx.body = sounds
+    }
+  },
+  {
+    method: 'delete',
+    uri: '/sound/:id',
+    cb: async (ctx: Context) => {
+      // @ts-ignore
+      let sound = await deleteSound(ctx.params.id)
+      ctx.body = sound
     }
   }
 ]

@@ -47,7 +47,7 @@ export async function createSound (request: object) {
         if (sound !== undefined) {
           // @ts-ignore
           let user = await User.findByIdAndUpdate(request.owner, {
-            $inc: { credits: -5 }
+            $inc: { credits: -1 }
           })
 
           return 'Sound successfully created.'
@@ -58,5 +58,23 @@ export async function createSound (request: object) {
     }
   } else {
     return 'Please fill data for sound creation.'
+  }
+}
+
+export async function deleteSound (soundId: string) {
+  try {
+    let sound = await Sound.findById(soundId)
+
+    if (sound !== undefined) {
+      let removed = await sound?.remove()
+
+      if (removed !== undefined) {
+        return 'The sound has been removed successfully.'
+      } else {
+        return 'An error has occured.'
+      }
+    }
+  } catch (err) {
+    return "There's no sound with this identifier."
   }
 }

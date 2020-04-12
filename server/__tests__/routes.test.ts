@@ -1,6 +1,7 @@
 import request from 'supertest'
 import app, { database } from '../index'
 import User from '../models/User'
+import { getSounds } from '../controllers/soundsController'
 
 afterAll(() => {
   database.close()
@@ -172,10 +173,11 @@ describe('Testing available Sounds routes', () => {
         public: false,
         owner: user?._id
       })
+
     expect(response.text).toEqual('Sound successfully created.')
   })
 
-  test('POST - Create sound without credits - /sound', async () => {
+  test('POST - Create sound without credits - /sound - FAIL', async () => {
     const rndName = [
       'Test Sound',
       'Testing sound',
@@ -196,6 +198,25 @@ describe('Testing available Sounds routes', () => {
         public: false,
         owner: user?._id
       })
-    expect(response.text).toEqual("You don't have enough credits to create a new sound.")
+
+    expect(response.text).toEqual(
+      "You don't have enough credits to create a new sound."
+    )
+  })
+
+  test('DELETE - Delete a specific sound - /sound/[randomSoundId]', async () => {
+    let randomSoundId = JSON.parse(await getSounds())
+
+    const response = await request(app.callback()).delete(
+      '/sound/' + randomSoundId[0]._id
+    )
+
+    expect(response.text).toEqual('The sound has been removed successfully.')
+  })
+
+  test('DELETE - Delete a non existing sound - /sound/000 - FAIL', async () => {
+    const response = await request(app.callback()).delete('/sound/000')
+
+    expect(response.text).toEqual("There's no sound with this identifier.")
   })
 })
