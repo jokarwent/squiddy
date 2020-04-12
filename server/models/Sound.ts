@@ -6,7 +6,7 @@ const SoundSchema = new Schema({
   description: String,
   url: String,
   public: Boolean,
-  validated: Boolean,
+  validated: { type: Boolean, default: false },
   owner: { type: Schema.Types.ObjectId, ref: 'User' }
 })
 

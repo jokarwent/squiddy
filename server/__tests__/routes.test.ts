@@ -108,3 +108,34 @@ describe('Testing available Users routes', () => {
     expect(response.text).toEqual("There's no user with this identifier.")
   })
 })
+
+describe('Testing available Sounds routes', () => {
+  test('GET - Sounds list - /sounds', async () => {
+    const response = await request(app.callback()).get('/sounds')
+    expect(response.text).not.toEqual('[]')
+  })
+
+  test('GET - Specific sound - /sound/5e92e8415277d0234d648159', async () => {
+    const response = await request(app.callback()).get(
+      '/sound/5e92e8415277d0234d648159'
+    )
+    expect(response.text).not.toEqual('[]')
+  })
+
+  test('GET - Specific sound - /sound/0000 - FAIL', async () => {
+    const response = await request(app.callback()).get('/sound/0000')
+    expect(response.text).toEqual('There is no sound with this identifier.')
+  })
+
+  test('GET - Sounds from user - /sounds/user/5e920caa1b8fb91ab1f5c04d', async () => {
+    const response = await request(app.callback()).get(
+      '/sounds/user/5e920caa1b8fb91ab1f5c04d'
+    )
+    expect(response.text).not.toEqual('[]')
+  })
+
+  test('GET - Sounds from user - /sounds/user/000 - FAIL', async () => {
+    const response = await request(app.callback()).get('/sounds/user/000')
+    expect(response.text).toEqual('There is not sounds for this user.')
+  })
+})
