@@ -29,3 +29,34 @@ export async function getSound (soundId: string) {
     return 'There is no sound with this identifier.'
   }
 }
+
+export async function createSound (request: object) {
+  if (JSON.stringify(request) !== '{}') {
+    // @ts-ignore
+    if (request.owner === undefined) {
+      return "You can't add a sound without an owner."
+    } else {
+      // @ts-ignore
+      let owner = await User.findById(request.owner)
+
+      if (owner.credits <= 0) {
+        return "You don't have enough credits to create a new sound."
+      } else {
+        let sound = Sound.create(request)
+
+        if (sound !== undefined) {
+          // @ts-ignore
+          let user = await User.findByIdAndUpdate(request.owner, {
+            $inc: { credits: -5 }
+          })
+
+          return 'Sound successfully created.'
+        } else {
+          return 'An error has occured.'
+        }
+      }
+    }
+  } else {
+    return 'Please fill data for sound creation.'
+  }
+}

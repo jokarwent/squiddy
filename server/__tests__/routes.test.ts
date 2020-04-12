@@ -127,15 +127,75 @@ describe('Testing available Sounds routes', () => {
     expect(response.text).toEqual('There is no sound with this identifier.')
   })
 
-  test('GET - Sounds from user - /sounds/user/5e920caa1b8fb91ab1f5c04d', async () => {
+  test('GET - Sounds from user - /sounds/user/5e9368d44a7f3c30a32b0565', async () => {
     const response = await request(app.callback()).get(
-      '/sounds/user/5e920caa1b8fb91ab1f5c04d'
+      '/sounds/user/5e9368d44a7f3c30a32b0565'
     )
     expect(response.text).not.toEqual('[]')
   })
 
-  test('GET - Sounds from user - /sounds/user/000 - FAIL', async () => {
-    const response = await request(app.callback()).get('/sounds/user/000')
-    expect(response.text).toEqual('There is not sounds for this user.')
+  test('POST - Create sound without informations - /sound - FAIL', async () => {
+    const response = await request(app.callback()).post('/sound')
+    expect(response.text).toEqual('Please fill data for sound creation.')
+  })
+
+  test('POST - Create sound without valid user - /sound - FAIL', async () => {
+    const response = await request(app.callback())
+      .post('/sound')
+      .send({
+        name: 'Test Sound',
+        description: 'A testing sound for test purposes.',
+        url: 'auto-generated',
+        public: false
+      })
+    expect(response.text).toEqual("You can't add a sound without an owner.")
+  })
+
+  test('POST - Create sound with credits - /sound', async () => {
+    const rndName = [
+      'Test Sound',
+      'Testing sound',
+      'Random name for testing',
+      'Just a test'
+    ]
+
+    const user = await User.findOne({
+      name: 'JokArwent'
+    })
+
+    const response = await request(app.callback())
+      .post('/sound')
+      .send({
+        name: rndName[Math.floor(Math.random() * rndName.length)],
+        description: 'A testing sound for test purposes.',
+        url: 'auto-generated',
+        public: false,
+        owner: user?._id
+      })
+    expect(response.text).toEqual('Sound successfully created.')
+  })
+
+  test('POST - Create sound without credits - /sound', async () => {
+    const rndName = [
+      'Test Sound',
+      'Testing sound',
+      'Random name for testing',
+      'Just a test'
+    ]
+
+    const user = await User.findOne({
+      name: 'Freemaan'
+    })
+
+    const response = await request(app.callback())
+      .post('/sound')
+      .send({
+        name: rndName[Math.floor(Math.random() * rndName.length)],
+        description: 'A testing sound for test purposes.',
+        url: 'auto-generated',
+        public: false,
+        owner: user?._id
+      })
+    expect(response.text).toEqual("You don't have enough credits to create a new sound.")
   })
 })
