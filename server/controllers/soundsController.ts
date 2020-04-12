@@ -39,7 +39,8 @@ export async function createSound (request: object) {
       // @ts-ignore
       let owner = await User.findById(request.owner)
 
-      if (owner.credits <= 0) {
+      // @ts-ignore
+      if (owner?.credits <= 0) {
         return "You don't have enough credits to create a new sound."
       } else {
         let sound = Sound.create(request)
