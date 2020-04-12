@@ -170,7 +170,8 @@ describe('Testing available Sounds routes', () => {
         name: rndName[Math.floor(Math.random() * rndName.length)],
         description: 'A testing sound for test purposes.',
         url: 'auto-generated',
-        public: false,
+        public: true,
+        validated: true,
         owner: user?._id
       })
 
@@ -195,7 +196,8 @@ describe('Testing available Sounds routes', () => {
         name: rndName[Math.floor(Math.random() * rndName.length)],
         description: 'A testing sound for test purposes.',
         url: 'auto-generated',
-        public: false,
+        public: true,
+        validated: true,
         owner: user?._id
       })
 

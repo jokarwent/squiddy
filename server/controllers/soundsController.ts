@@ -3,15 +3,27 @@ import { Types } from 'mongoose'
 import User from '../models/User'
 import { getUserById } from './usersController'
 
+/**
+ *
+ */
 export async function getSounds () {
   try {
     let sounds = await Sound.find()
+
+    sounds = sounds.filter(
+      sound => sound.validated === true && sound.public === true
+    )
+
     return JSON.stringify(sounds)
   } catch (err) {
     return 'An error has occured.'
   }
 }
 
+/**
+ *
+ * @param userId
+ */
 export async function getSoundsFromUserId (userId: string) {
   try {
     let sounds = await Sound.find({ owner: userId })
@@ -21,6 +33,10 @@ export async function getSoundsFromUserId (userId: string) {
   }
 }
 
+/**
+ *
+ * @param soundId
+ */
 export async function getSound (soundId: string) {
   try {
     let sound = await Sound.findById(soundId)
@@ -30,6 +46,10 @@ export async function getSound (soundId: string) {
   }
 }
 
+/**
+ *
+ * @param request
+ */
 export async function createSound (request: object) {
   if (JSON.stringify(request) !== '{}') {
     // @ts-ignore
@@ -62,6 +82,10 @@ export async function createSound (request: object) {
   }
 }
 
+/**
+ *
+ * @param soundId
+ */
 export async function deleteSound (soundId: string) {
   try {
     let sound = await Sound.findById(soundId)

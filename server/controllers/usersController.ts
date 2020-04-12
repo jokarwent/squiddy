@@ -1,10 +1,15 @@
 import sha256 from 'sha256'
 import User from '../models/User'
 
+/**
+ * Create a user with POST request data
+ * @param request
+ */
 export async function createUser (request: object) {
   if (JSON.stringify(request) !== '{}') {
     // @ts-ignore
     const { email, name, password, passwordVerification, adult } = request
+
     let isExisting =
       (await User.exists({ name })) || (await User.exists({ email }))
 
@@ -30,6 +35,10 @@ export async function createUser (request: object) {
   }
 }
 
+/**
+ * Delete a user with POST request data
+ * @param userId
+ */
 export async function deleteUser (userId: string) {
   try {
     let user = await User.findById(userId)
@@ -48,6 +57,10 @@ export async function deleteUser (userId: string) {
   }
 }
 
+/**
+ *
+ * @param userId
+ */
 export async function getUserById (userId: string) {
   try {
     let user = await User.findById(userId)
@@ -61,6 +74,11 @@ export async function getUserById (userId: string) {
   }
 }
 
+/**
+ *
+ * @param email
+ * @param password
+ */
 export async function login (email: string, password: string) {
   // should be finished with token generation
   // and more security
