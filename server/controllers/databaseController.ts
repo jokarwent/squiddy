@@ -3,16 +3,22 @@ import mongoose from 'mongoose'
 export class Database {
   conn: typeof mongoose | undefined
 
-  constructor () {}
-
+  /**
+   *
+   * @param string
+   */
   async connect (string: string) {
     this.conn = await mongoose.connect(string, {
       useNewUrlParser: true,
-      useUnifiedTopology: true
+      useUnifiedTopology: true,
+      useFindAndModify: false
     })
   }
 
+  /**
+   *
+   */
   async close () {
-    this.conn != undefined ? this.conn?.disconnect() : null
+    if (this.conn) await this.conn.disconnect()
   }
 }

@@ -1,41 +1,47 @@
 import sha256 from 'sha256'
 import User from '../models/User'
 
-export async function createUser (request: object) {
-  if (JSON.stringify(request) !== '{}') {
-    // @ts-ignore
-    const { email, name, password, passwordVerification, adult } = request
-    let isExisting =
-      (await User.exists({ name })) || (await User.exists({ email }))
+/**
+ * Create a user with POST request data
+ * @param request
+ */
+declare interface ICreateUser {
+  email: string
+  name: string
+  password: string
+  passwordVerification: string
+  adult: boolean
+}
+export async function createUser (body: ICreateUser) {
+  const { email, name, password, passwordVerification, adult } = body
 
-    if (!isExisting) {
-      if (password === passwordVerification) {
-        let crypted = sha256.x2(password)
-        let user = await User.create({ name, email, password: crypted, adult })
-        let saved = await user.save()
-
-        if (saved !== undefined) {
-          return 'The user has been added successfully.'
-        } else {
-          return 'An error has occured.'
-        }
-      } else {
-        return 'The password does not match.'
-      }
-    } else {
-      return 'A user with the same name or the same email is already existing.'
-    }
-  } else {
+  if (!email || !name || !password || !passwordVerification || !adult) {
     return 'Please fill data for user creation.'
   }
+
+  if (password.trim() !== passwordVerification.trim()) return 'The password does not match.'
+
+  const alreadyExists = await User.findOne({ $or: [{ name }, { email }] })
+  if (alreadyExists) return 'A user with the same name or the same email is already existing.'
+
+  const crypted = sha256.x2(password)
+  const user = await User.create({ name, email, password: crypted, adult })
+
+  if (!user) return 'An error has occured.'
+
+  return 'The user has been added successfully.'
 }
 
+/**
+ * Delete a user with POST request data
+ * @param userId
+ */
 export async function deleteUser (userId: string) {
   try {
-    let user = await User.findById(userId)
+    const user = await User.findById(userId)
 
-    if (user !== undefined) {
-      let removed = await user?.remove()
+    if (!user) {
+      const removed = await user?.remove()
 
       if (removed !== undefined) {
         return 'The user has been removed successfully.'
@@ -48,9 +54,13 @@ export async function deleteUser (userId: string) {
   }
 }
 
+/**
+ *
+ * @param userId
+ */
 export async function getUserById (userId: string) {
   try {
-    let user = await User.findById(userId)
+    const user = await User.findById(userId)
     user?.set('email', undefined)
     user?.set('password', undefined)
     user?.set('credits', undefined)
@@ -61,12 +71,17 @@ export async function getUserById (userId: string) {
   }
 }
 
+/**
+ *
+ * @param email
+ * @param password
+ */
 export async function login (email: string, password: string) {
   // should be finished with token generation
   // and more security
   try {
-    let user = await User.findOne({ email })
-    let crypted = sha256.x2(password)
+    const user = await User.findOne({ email })
+    const crypted = sha256.x2(password)
 
     // @ts-ignore
     if (user.password === crypted) {
