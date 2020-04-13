@@ -21,9 +21,13 @@ export const userRoutes = [
     uri: '/user/register',
     cb: async (ctx: Context) => {
       // @ts-ignore
-      let request = ctx.request.body
-      let res = await createUser(request)
-      ctx.body = res
+      const { body } = ctx.request
+      const res = await createUser(body)
+
+      if (res) {
+        ctx.status = res.type
+        ctx.body = res.message
+      }
     }
   },
   {
@@ -31,8 +35,8 @@ export const userRoutes = [
     uri: '/user/login',
     cb: async (ctx: Context) => {
       // @ts-ignore
-      let request = ctx.request.body
-      let res = await login(request.email, request.password)
+      const request = ctx.request.body
+      const res = await login(request.email, request.password)
       ctx.body = res
     }
   },
@@ -40,7 +44,7 @@ export const userRoutes = [
     method: 'delete',
     uri: '/user/:id',
     cb: async (ctx: Context) => {
-      let res = await deleteUser(ctx.params.id)
+      const res = await deleteUser(ctx.params.id)
       ctx.body = res
     }
   },
@@ -48,7 +52,7 @@ export const userRoutes = [
     method: 'get',
     uri: '/user/:id',
     cb: async (ctx: Context) => {
-      let user = await getUserById(ctx.params.id)
+      const user = await getUserById(ctx.params.id)
       ctx.body = user
     }
   }
@@ -59,7 +63,7 @@ export const soundsRoutes = [
     method: 'get',
     uri: '/sounds/',
     cb: async (ctx: Context) => {
-      let sounds = await getSounds()
+      const sounds = await getSounds()
       ctx.body = sounds
     }
   },
@@ -67,7 +71,7 @@ export const soundsRoutes = [
     method: 'get',
     uri: '/sounds/user/:id',
     cb: async (ctx: Context) => {
-      let sounds = await getSoundsFromUserId(ctx.params.id)
+      const sounds = await getSoundsFromUserId(ctx.params.id)
       ctx.body = sounds
     }
   },
@@ -75,7 +79,7 @@ export const soundsRoutes = [
     method: 'get',
     uri: '/sound/:id',
     cb: async (ctx: Context) => {
-      let sounds = await getSound(ctx.params.id)
+      const sounds = await getSound(ctx.params.id)
       ctx.body = sounds
     }
   },
@@ -84,8 +88,8 @@ export const soundsRoutes = [
     uri: '/sound',
     cb: async (ctx: Context) => {
       // @ts-ignore
-      let request = ctx.request.body
-      let sounds = await createSound(request)
+      const request = ctx.request.body
+      const sounds = await createSound(request)
       ctx.body = sounds
     }
   },
@@ -94,7 +98,7 @@ export const soundsRoutes = [
     uri: '/sound/:id',
     cb: async (ctx: Context) => {
       // @ts-ignore
-      let sound = await deleteSound(ctx.params.id)
+      const sound = await deleteSound(ctx.params.id)
       ctx.body = sound
     }
   }

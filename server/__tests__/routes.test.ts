@@ -53,14 +53,14 @@ describe('Testing available Users routes', () => {
     const response = await request(app.callback())
       .post('/user/register')
       .send({
-        name: 'Freemaan',
+        name: 'Free',
         email: 'free@squiddy.io',
         adult: false,
         password: 'nopassword123',
         passwordVerification: 'nopassword123'
       })
     expect(response.text).toEqual(
-      'A user with the same name or the same email is already existing.'
+      'A user with the name name/email is already existing.'
     )
   })
 
@@ -75,7 +75,7 @@ describe('Testing available Users routes', () => {
         passwordVerification: 'nopassword456'
       })
     expect(response.text).toEqual(
-      'A user with the same name or the same email is already existing.'
+      'A user with the name name/email is already existing.'
     )
   })
 
@@ -91,9 +91,10 @@ describe('Testing available Users routes', () => {
         name: 'RandomDoode',
         email: 'dood@squiddy.io',
         password: 'lolnope',
-        passwordVerification: 'lolnope'
+        passwordVerification: 'lolnope',
+        adult: false
       })
-    expect(response.text).toEqual('The user has been added successfully.')
+    expect(response.text).toEqual('User has been added successfully.')
   })
 
   test('DELETE - Delete a existing user - /user/', async () => {
@@ -207,7 +208,7 @@ describe('Testing available Sounds routes', () => {
   })
 
   test('DELETE - Delete a specific sound - /sound/[randomSoundId]', async () => {
-    let randomSoundId = JSON.parse(await getSounds())
+    const randomSoundId = JSON.parse(await getSounds())
 
     const response = await request(app.callback()).delete(
       '/sound/' + randomSoundId[0]._id
