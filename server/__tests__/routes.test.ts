@@ -37,16 +37,16 @@ describe('Testing available Users routes', () => {
     expect(response.text).toEqual('This user does not exists in our database.')
   })
 
-  test('GET - Retrieving a user - /user/5e920caa1b8fb91ab1f5c04d', async () => {
+  test('GET - Retrieving a user - /user/5e9368d44a7f3c30a32b0565', async () => {
     const response = await request(app.callback()).get(
-      '/user/5e920caa1b8fb91ab1f5c04d'
+      '/user/5e9368d44a7f3c30a32b0565'
     )
-    expect(response.text).not.toEqual('{}')
+    expect(response.text).not.toEqual('An error has occured.')
   })
 
   test('GET - Retrieving a non existing user - /user/0000 - FAIL', async () => {
     const response = await request(app.callback()).get('/user/0000')
-    expect(response.text).toEqual('There is not user with that identifier.')
+    expect(response.text).toEqual('There is no user with this identifier, aborting.')
   })
 
   test('POST - Try to create a user with the same email - /user/register  - FAIL', async () => {

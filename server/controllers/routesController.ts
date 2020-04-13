@@ -56,8 +56,12 @@ export const userRoutes = [
     method: 'get',
     uri: '/user/:id',
     cb: async (ctx: Context) => {
-      const user = await getUserById(ctx.params.id)
-      ctx.body = user
+      const res = await getUserById(ctx.params.id)
+
+      if (res) {
+        ctx.status = res.type
+        ctx.body = res.message
+      }
     }
   }
 ]

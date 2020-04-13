@@ -12,7 +12,7 @@ declare interface ICreateUser {
 
 /**
  * Create a user with POST request data
- * @param request
+ * @param request ICreateUser
  */
 export async function createUser (body: ICreateUser) {
   const { email, name, password, passwordVerification, adult } = body
@@ -34,9 +34,10 @@ export async function createUser (body: ICreateUser) {
 
 /**
  * Delete a user with POST request data
+ *
  * Shouldn't remove an user, but changing his data for
  * sounds uploaded or maybe do a user purge at deletion?
- * @param userId
+ * @param userId string
  */
 export async function deleteUser (userId: string) {
   try {
@@ -58,13 +59,15 @@ export async function deleteUser (userId: string) {
 export async function getUserById (userId: string) {
   try {
     const user = await User.findById(userId)
-    user?.set('email', undefined)
-    user?.set('password', undefined)
-    user?.set('credits', undefined)
+    if (!user) return handleError({ type: 400, message: 'An error has occured.' })
 
-    return JSON.stringify(user)
+    user.set('email', undefined)
+    user.set('password', undefined)
+    user.set('credits', undefined)
+
+    return handleError({ type: 200, message: JSON.stringify(user) })
   } catch (err) {
-    return 'There is not user with that identifier.'
+    return handleError({ type: 404, message: 'There is no user with this identifier, aborting.' })
   }
 }
 
