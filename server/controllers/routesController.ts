@@ -45,7 +45,11 @@ export const userRoutes = [
     uri: '/user/:id',
     cb: async (ctx: Context) => {
       const res = await deleteUser(ctx.params.id)
-      ctx.body = res
+
+      if (res) {
+        ctx.status = res.type
+        ctx.body = res.message
+      }
     }
   },
   {

@@ -34,23 +34,20 @@ export async function createUser (body: ICreateUser) {
 
 /**
  * Delete a user with POST request data
+ * Shouldn't remove an user, but changing his data for
+ * sounds uploaded or maybe do a user purge at deletion?
  * @param userId
  */
 export async function deleteUser (userId: string) {
   try {
     const user = await User.findById(userId)
 
-    if (user !== undefined) {
-      const removed = await user?.remove()
+    const removed = user?.remove()
+    if (!removed) return handleError({ type: 400, message: 'An error has occured.' })
 
-      if (removed !== undefined) {
-        return 'The user has been removed successfully.'
-      } else {
-        return 'An error has occured.'
-      }
-    }
-  } catch (err) {
-    return "There's no user with this identifier."
+    return handleError({ type: 200, message: 'User has been deleted successfully.' })
+  } catch {
+    return handleError({ type: 404, message: 'There is no user with this identifier, aborting.' })
   }
 }
 

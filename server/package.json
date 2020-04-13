@@ -55,6 +55,7 @@
       "jest",
       "beforeEach",
       "beforeAll",
+      "afterAll",
       "test",
       "xtest",
       "describe",

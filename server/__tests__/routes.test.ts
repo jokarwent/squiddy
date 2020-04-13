@@ -102,12 +102,12 @@ describe('Testing available Users routes', () => {
     const response = await request(app.callback()).delete(
       '/user/' + getUser?._id
     )
-    expect(response.text).toEqual('The user has been removed successfully.')
+    expect(response.text).toEqual('User has been deleted successfully.')
   })
 
   test('DELETE - Try to delete a not existing user - /user/ - FAIL', async () => {
     const response = await request(app.callback()).delete('/user/notexisting')
-    expect(response.text).toEqual("There's no user with this identifier.")
+    expect(response.text).toEqual('There is no user with this identifier, aborting.')
   })
 })
 
