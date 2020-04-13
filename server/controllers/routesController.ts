@@ -1,7 +1,6 @@
 import { Context } from 'koa'
 import { getUserById, createUser, deleteUser, login } from './usersController'
 import { getSounds, getSound, getSoundsFromUserId, createSound, deleteSound } from './soundsController'
-import User from '../models/User'
 
 // ex: getSounds from 'controller/sound'
 
@@ -35,9 +34,13 @@ export const userRoutes = [
     uri: '/user/login',
     cb: async (ctx: Context) => {
       // @ts-ignore
-      const request = ctx.request.body
-      const res = await login(request.email, request.password)
-      ctx.body = res
+      const { body } = ctx.request
+      const res = await login(body)
+
+      if (res) {
+        ctx.status = res.type
+        ctx.body = res.message
+      }
     }
   },
   {
@@ -71,24 +74,36 @@ export const soundsRoutes = [
     method: 'get',
     uri: '/sounds/',
     cb: async (ctx: Context) => {
-      const sounds = await getSounds()
-      ctx.body = sounds
+      const res = await getSounds()
+
+      if (res) {
+        ctx.status = res.type
+        ctx.body = res.message
+      }
     }
   },
   {
     method: 'get',
     uri: '/sounds/user/:id',
     cb: async (ctx: Context) => {
-      const sounds = await getSoundsFromUserId(ctx.params.id)
-      ctx.body = sounds
+      const res = await getSoundsFromUserId(ctx.params.id)
+
+      if (res) {
+        ctx.status = res.type
+        ctx.body = res.message
+      }
     }
   },
   {
     method: 'get',
     uri: '/sound/:id',
     cb: async (ctx: Context) => {
-      const sounds = await getSound(ctx.params.id)
-      ctx.body = sounds
+      const res = await getSound(ctx.params.id)
+
+      if (res) {
+        ctx.status = res.type
+        ctx.body = res.message
+      }
     }
   },
   {
@@ -96,9 +111,13 @@ export const soundsRoutes = [
     uri: '/sound',
     cb: async (ctx: Context) => {
       // @ts-ignore
-      const request = ctx.request.body
-      const sounds = await createSound(request)
-      ctx.body = sounds
+      const { body } = ctx.request
+      const res = await createSound(body)
+
+      if (res) {
+        ctx.status = res.type
+        ctx.body = res.message
+      }
     }
   },
   {
@@ -106,8 +125,12 @@ export const soundsRoutes = [
     uri: '/sound/:id',
     cb: async (ctx: Context) => {
       // @ts-ignore
-      const sound = await deleteSound(ctx.params.id)
-      ctx.body = sound
+      const res = await deleteSound(ctx.params.id)
+
+      if (res) {
+        ctx.status = res.type
+        ctx.body = res.message
+      }
     }
   }
 ]

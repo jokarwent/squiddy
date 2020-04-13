@@ -1,7 +1,6 @@
 import Sound from '../models/Sound'
-import { Types } from 'mongoose'
 import User from '../models/User'
-import { getUserById } from './usersController'
+import { handleError } from '../controllers/errorsController'
 
 /**
  *
@@ -9,14 +8,16 @@ import { getUserById } from './usersController'
 export async function getSounds () {
   try {
     let sounds = await Sound.find()
+    if (!sounds) return handleError({ type: 400, message: 'An error has occured.' })
 
     sounds = sounds.filter(
+      // @ts-ignore
       sound => sound.validated === true && sound.public === true
     )
 
-    return JSON.stringify(sounds)
+    return handleError({ type: 200, message: JSON.stringify(sounds) })
   } catch (err) {
-    return 'An error has occured.'
+    return handleError({ type: 400, message: 'An error has occured.' })
   }
 }
 
@@ -26,10 +27,12 @@ export async function getSounds () {
  */
 export async function getSoundsFromUserId (userId: string) {
   try {
-    let sounds = await Sound.find({ owner: userId })
-    return JSON.stringify(sounds)
+    const sounds = await Sound.find({ owner: userId })
+    if (!sounds) return handleError({ type: 400, message: 'An error has occured.' })
+
+    return handleError({ type: 200, message: JSON.stringify(sounds) })
   } catch (err) {
-    return 'There is not sounds for this user.'
+    return handleError({ type: 400, message: 'An error has occured.' })
   }
 }
 
@@ -39,46 +42,51 @@ export async function getSoundsFromUserId (userId: string) {
  */
 export async function getSound (soundId: string) {
   try {
-    let sound = await Sound.findById(soundId)
-    return JSON.stringify(sound)
+    const sound = await Sound.findById(soundId)
+    if (!sound) handleError({ type: 400, message: 'An error has occured.' })
+
+    handleError({ type: 200, message: JSON.stringify(sound) })
   } catch (err) {
-    return 'There is no sound with this identifier.'
+    return handleError({ type: 400, message: 'An error has occured.' })
   }
+}
+
+declare interface ICreateSound{
+  name: string,
+  description: string,
+  _public: boolean,
+  owner: string
 }
 
 /**
  *
  * @param request
  */
-export async function createSound (request: object) {
-  if (JSON.stringify(request) !== '{}') {
+export async function createSound (body: ICreateSound) {
+  try {
+    const { name, description, _public, owner } = body
+
+    if (!name || !description) return handleError({ type: 400, message: 'Please fill data for sound creation.' })
+    if (!owner) return handleError({ type: 400, message: "You can't add a sound without an owner." })
+
+    const userOwner = await User.findById(owner)
+    if (!userOwner) return handleError({ type: 404, message: 'The owner is not found.' })
+
     // @ts-ignore
-    if (request.owner === undefined) {
-      return "You can't add a sound without an owner."
-    } else {
-      // @ts-ignore
-      let owner = await User.findById(request.owner)
-
-      // @ts-ignore
-      if (owner?.credits <= 0) {
-        return "You don't have enough credits to create a new sound."
-      } else {
-        let sound = Sound.create(request)
-
-        if (sound !== undefined) {
-          // @ts-ignore
-          let user = await User.findByIdAndUpdate(request.owner, {
-            $inc: { credits: -1 }
-          })
-
-          return 'Sound successfully created.'
-        } else {
-          return 'An error has occured.'
-        }
-      }
+    if (userOwner.credits <= 0) {
+      return handleError({ type: 401, message: "You don't have enough credits to create a new sound." })
     }
-  } else {
-    return 'Please fill data for sound creation.'
+
+    const sound = await Sound.create({ name, description, public: _public, owner: userOwner._id })
+    if (!sound) return handleError({ type: 400, message: 'An error has occured.' })
+
+    userOwner.updateOne({ $inc: { credits: -1 } }, function (err, raw) {
+      if (err) handleError({ type: 400, message: err })
+    })
+
+    return handleError({ type: 200, message: 'Sound successfully created.' })
+  } catch (err) {
+    return handleError({ type: 400, message: 'An error has occured.' })
   }
 }
 
@@ -88,18 +96,15 @@ export async function createSound (request: object) {
  */
 export async function deleteSound (soundId: string) {
   try {
-    let sound = await Sound.findById(soundId)
+    /* look further for "findByIdAndRemove" && "findByIdAndDelete" */
+    const sound = await Sound.findById(soundId)
+    if (!sound) return handleError({ type: 400, message: 'There is not sound with this identifier.' })
 
-    if (sound !== undefined) {
-      let removed = await sound?.remove()
+    const removed = await sound.remove()
+    if (!removed) return handleError({ type: 400, message: 'An error has occured' })
 
-      if (removed !== undefined) {
-        return 'The sound has been removed successfully.'
-      } else {
-        return 'An error has occured.'
-      }
-    }
-  } catch (err) {
-    return "There's no sound with this identifier."
+    return handleError({ type: 200, message: 'The sound has been removed successfully.' })
+  } catch {
+    return handleError({ type: 400, message: 'An error has occured.' })
   }
 }

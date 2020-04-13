@@ -3,8 +3,6 @@ import mongoose from 'mongoose'
 export class Database {
   conn: typeof mongoose | undefined
 
-  constructor () {}
-
   /**
    *
    * @param string
@@ -21,6 +19,8 @@ export class Database {
    *
    */
   async close () {
-    this.conn != undefined ? this.conn?.disconnect() : null
+    if (this.conn) {
+      this.conn.disconnect()
+    }
   }
 }

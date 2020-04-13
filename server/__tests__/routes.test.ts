@@ -20,7 +20,7 @@ describe('Testing available Users routes', () => {
     const response = await request(app.callback())
       .post('/user/login')
       .send({ email: 'jok@squiddy.io', password: 'nopassword456' })
-    expect(response.text).toEqual('Logged success.')
+    expect(response.text).toEqual('Login success.')
   })
 
   test('POST - Login fail as Free with a fake password - /user/login - FAIL', async () => {
@@ -34,7 +34,7 @@ describe('Testing available Users routes', () => {
     const response = await request(app.callback())
       .post('/user/login')
       .send({ email: 'none@none.io', password: 'nonepassword' })
-    expect(response.text).toEqual('This user does not exists in our database.')
+    expect(response.text).toEqual('There is no user found with this email, aborting.')
   })
 
   test('GET - Retrieving a user - /user/5e9368d44a7f3c30a32b0565', async () => {
@@ -114,7 +114,7 @@ describe('Testing available Users routes', () => {
 describe('Testing available Sounds routes', () => {
   test('GET - Sounds list - /sounds', async () => {
     const response = await request(app.callback()).get('/sounds')
-    expect(response.text).not.toEqual('[]')
+    expect(response.text).not.toEqual('[]') /* todo look at this later */
   })
 
   test('GET - Specific sound - /sound/5e92e8415277d0234d648159', async () => {
@@ -126,7 +126,7 @@ describe('Testing available Sounds routes', () => {
 
   test('GET - Specific sound - /sound/0000 - FAIL', async () => {
     const response = await request(app.callback()).get('/sound/0000')
-    expect(response.text).toEqual('There is no sound with this identifier.')
+    expect(response.text).toEqual('An error has occured.')
   })
 
   test('GET - Sounds from user - /sounds/user/5e9368d44a7f3c30a32b0565', async () => {
@@ -207,11 +207,26 @@ describe('Testing available Sounds routes', () => {
     )
   })
 
+  test('POST - Create sound with fake user id - /sound - FAIL', async () => {
+    const response = await request(app.callback())
+      .post('/sound')
+      .send({
+        name: 'Test Sound',
+        description: 'A testing sound for test purposes.',
+        url: 'auto-generated',
+        public: false,
+        owner: '5e9368d44a7f3d30a32z9565'
+      })
+    expect(response.text).toEqual('An error has occured.')
+  })
+
   test('DELETE - Delete a specific sound - /sound/[randomSoundId]', async () => {
-    const randomSoundId = JSON.parse(await getSounds())
+    // @ts-ignore
+    const getSoundsList = JSON.parse(await getSounds().then((res) => { return res.message }))
+    if (!getSoundsList) console.log("Mhm there's something wrong there.")
 
     const response = await request(app.callback()).delete(
-      '/sound/' + randomSoundId[0]._id
+      '/sound/' + getSoundsList[0]._id
     )
 
     expect(response.text).toEqual('The sound has been removed successfully.')
@@ -220,6 +235,6 @@ describe('Testing available Sounds routes', () => {
   test('DELETE - Delete a non existing sound - /sound/000 - FAIL', async () => {
     const response = await request(app.callback()).delete('/sound/000')
 
-    expect(response.text).toEqual("There's no sound with this identifier.")
+    expect(response.text).toEqual('An error has occured.')
   })
 })

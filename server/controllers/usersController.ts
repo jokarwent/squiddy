@@ -42,6 +42,7 @@ export async function createUser (body: ICreateUser) {
 export async function deleteUser (userId: string) {
   try {
     const user = await User.findById(userId)
+    if (!user) return handleError({ type: 400, message: 'There is no user with this identifier, aborting.' })
 
     const removed = user?.remove()
     if (!removed) return handleError({ type: 400, message: 'An error has occured.' })
@@ -76,20 +77,23 @@ export async function getUserById (userId: string) {
  * @param email
  * @param password
  */
-export async function login (email: string, password: string) {
-  // should be finished with token generation
-  // and more security
+export async function login ({ email, password } : { email : string, password : string }) {
   try {
     const user = await User.findOne({ email })
+    if (!user) return handleError({ type: 404, message: 'There is no user found with this email, aborting.' })
+
+    // should be finished with token generation
+    // and more security and should use bcrypt!
+    // instead "sha256"
     const crypted = sha256.x2(password)
 
     // @ts-ignore
     if (user.password === crypted) {
-      return 'Logged success.'
+      return handleError({ type: 200, message: 'Login success.' })
     } else {
-      return 'Password does not match.'
+      return handleError({ type: 400, message: 'Password does not match.' })
     }
   } catch (err) {
-    return 'This user does not exists in our database.'
+    return handleError({ type: 404, message: 'There is no user found with this email, aborting.' })
   }
 }
