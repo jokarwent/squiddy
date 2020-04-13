@@ -80,28 +80,34 @@ export async function createSound (body: ICreateSound) {
       return handleError({ type: 401, message: "You don't have enough credits to create a new sound." })
     }
 
-    const sound = await Sound.create({ name, description, public: _public, validated, owner: userOwner._id })
+    /* need a better handle for this */
+    const fp = require('file-type')
+    const uuid = require('uuid')
+    const fileName = uuid.v4().replace(/-/g, '')
+
+    const type = await fp.fromBuffer(Buffer.from(soundData))
+
+    const sound = await Sound.create({ name, description, public: _public, validated, owner: userOwner._id, url: fileName + '.' + type.ext })
     if (!sound) return handleError({ type: 400, message: 'An error has occured.' })
+
+    createSoundFile(soundData, fileName + '.' + type.ext)
 
     userOwner.updateOne({ $inc: { credits: -1 } }, function (err, raw) {
       if (err) handleError({ type: 400, message: err })
     })
 
-    createSoundFile(soundData)
     return handleError({ type: 200, message: 'Sound successfully created.' })
   } catch (err) {
     return handleError({ type: 400, message: 'An error has occured.' })
   }
 }
 
-async function createSoundFile (soundData : any) {
+async function createSoundFile (soundData : any, fileName : string) {
   /* may use import instead of require maybe? TODO */
   const fs = require('fs')
   const path = require('path')
-  const fp = require('file-type')
 
-  const type = await fp.fromBuffer(Buffer.from(soundData))
-  fs.writeFileSync(path.join(__dirname, '../uploads/soundrnd.' + type.ext), Buffer.from(soundData))
+  fs.writeFileSync(path.join(__dirname, '../uploads/' + fileName), Buffer.from(soundData))
 }
 
 /**
@@ -121,4 +127,8 @@ export async function deleteSound (soundId: string) {
   } catch {
     return handleError({ type: 400, message: 'An error has occured.' })
   }
+}
+
+export async function getSoundUrl (soundId : string) {
+  const sound = await Sound.findById(soundId)
 }

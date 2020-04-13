@@ -27,3 +27,6 @@
   - [ ] PATCH - ./soundbox/:id
   - [ ] DELETE - ./soundbox/:id
   - [ ] DELETE - ./soundboxes/user/:id
+
+
+## Thanks for watching the stream! See y'all later! Much love! :)
