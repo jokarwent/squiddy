@@ -3,6 +3,9 @@ import app, { database } from '../index'
 import User from '../models/User'
 import { getSounds } from '../controllers/soundsController'
 
+import fs from 'fs'
+import path from 'path'
+
 afterAll(() => {
   database.close()
 })
@@ -137,14 +140,19 @@ describe('Testing available Sounds routes', () => {
   })
 
   test('POST - Create sound without informations - /sound - FAIL', async () => {
-    const response = await request(app.callback()).post('/sound')
+    const file = fs.readFileSync(path.join(__dirname, '/sounds/whistling.wav'))
+
+    const response = await request(app.callback()).post('/sound').send({ soundData: file })
     expect(response.text).toEqual('Please fill data for sound creation.')
   })
 
   test('POST - Create sound without valid user - /sound - FAIL', async () => {
+    const file = fs.readFileSync(path.join(__dirname, '/sounds/whistling.wav'))
+
     const response = await request(app.callback())
       .post('/sound')
       .send({
+        soundData: file,
         name: 'Test Sound',
         description: 'A testing sound for test purposes.',
         url: 'auto-generated',
@@ -154,6 +162,8 @@ describe('Testing available Sounds routes', () => {
   })
 
   test('POST - Create sound with credits - /sound', async () => {
+    const file = fs.readFileSync(path.join(__dirname, '/sounds/whistling.wav'))
+
     const rndName = [
       'Test Sound',
       'Testing sound',
@@ -168,10 +178,11 @@ describe('Testing available Sounds routes', () => {
     const response = await request(app.callback())
       .post('/sound')
       .send({
+        soundData: file,
         name: rndName[Math.floor(Math.random() * rndName.length)],
         description: 'A testing sound for test purposes.',
         url: 'auto-generated',
-        public: true,
+        _public: true,
         validated: true,
         owner: user?._id
       })
@@ -180,6 +191,8 @@ describe('Testing available Sounds routes', () => {
   })
 
   test('POST - Create sound without credits - /sound - FAIL', async () => {
+    const file = fs.readFileSync(path.join(__dirname, '/sounds/whistling.wav'))
+
     const rndName = [
       'Test Sound',
       'Testing sound',
@@ -194,10 +207,11 @@ describe('Testing available Sounds routes', () => {
     const response = await request(app.callback())
       .post('/sound')
       .send({
+        soundData: file,
         name: rndName[Math.floor(Math.random() * rndName.length)],
         description: 'A testing sound for test purposes.',
         url: 'auto-generated',
-        public: true,
+        _public: true,
         validated: true,
         owner: user?._id
       })
@@ -208,9 +222,12 @@ describe('Testing available Sounds routes', () => {
   })
 
   test('POST - Create sound with fake user id - /sound - FAIL', async () => {
+    const file = fs.readFileSync(path.join(__dirname, '/sounds/whistling.mp3'))
+
     const response = await request(app.callback())
       .post('/sound')
       .send({
+        soundData: file,
         name: 'Test Sound',
         description: 'A testing sound for test purposes.',
         url: 'auto-generated',

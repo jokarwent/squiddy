@@ -7,7 +7,6 @@ import { Database } from './controllers/databaseController'
 
 const app = new Koa()
 const router = new Router()
-const parser = new bodyParser()
 
 export const database = new Database()
 
@@ -30,7 +29,11 @@ for (const { method, uri, cb } of soundsRoutes) {
   router[method](uri, cb)
 }
 
-app.use(parser)
+app.use(bodyParser(
+  {
+    jsonLimit: '2mb' /* thanks to zebedixeuroslekilo for helping me out xD */
+  }
+))
 app.use(router.routes())
 
 export default app

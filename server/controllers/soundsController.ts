@@ -52,20 +52,23 @@ export async function getSound (soundId: string) {
 }
 
 declare interface ICreateSound{
+  soundData: object,
   name: string,
   description: string,
   _public: boolean,
+  validated: boolean,
   owner: string
 }
 
 /**
  *
- * @param request
+ * @param body
  */
 export async function createSound (body: ICreateSound) {
   try {
-    const { name, description, _public, owner } = body
+    const { soundData, name, description, validated, _public, owner } = body
 
+    if (!soundData) return handleError({ type: 400, message: "You can't add a sound without a file." })
     if (!name || !description) return handleError({ type: 400, message: 'Please fill data for sound creation.' })
     if (!owner) return handleError({ type: 400, message: "You can't add a sound without an owner." })
 
@@ -77,17 +80,28 @@ export async function createSound (body: ICreateSound) {
       return handleError({ type: 401, message: "You don't have enough credits to create a new sound." })
     }
 
-    const sound = await Sound.create({ name, description, public: _public, owner: userOwner._id })
+    const sound = await Sound.create({ name, description, public: _public, validated, owner: userOwner._id })
     if (!sound) return handleError({ type: 400, message: 'An error has occured.' })
 
     userOwner.updateOne({ $inc: { credits: -1 } }, function (err, raw) {
       if (err) handleError({ type: 400, message: err })
     })
 
+    createSoundFile(soundData)
     return handleError({ type: 200, message: 'Sound successfully created.' })
   } catch (err) {
     return handleError({ type: 400, message: 'An error has occured.' })
   }
+}
+
+async function createSoundFile (soundData : any) {
+  /* may use import instead of require maybe? TODO */
+  const fs = require('fs')
+  const path = require('path')
+  const fp = require('file-type')
+
+  const type = await fp.fromBuffer(Buffer.from(soundData))
+  fs.writeFileSync(path.join(__dirname, '../uploads/soundrnd.' + type.ext), Buffer.from(soundData))
 }
 
 /**

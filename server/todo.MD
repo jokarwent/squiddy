@@ -11,7 +11,6 @@
   - [X] GET - ./sounds
   - [X] GET - ./sounds/user/:id
   - [X] GET - ./sound/:id
-  - [ ] GET - ./sounds/user/:id
   - [ ] GET - ./sounds/pending
   - [ ] POST - ./sound - { soundFile, name, desc, owner }
     - TODO: File retrieving
