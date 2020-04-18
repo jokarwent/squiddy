@@ -1,5 +1,5 @@
 declare interface IHandleError{
-    type: number,
+    type: number
     message: string
 }
 

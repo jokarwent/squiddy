@@ -14,17 +14,21 @@ declare interface ICreateUser {
  * Create a user with POST request data
  * @param request ICreateUser
  */
-export async function createUser (body: ICreateUser) {
+export async function createUser(body: ICreateUser) {
   const { email, name, password, passwordVerification, adult } = body
+
+  // todo check email is an email
 
   if (!email || !name || !password || !passwordVerification) return handleError({ type: 400, message: 'Please fill data for user creation.' })
   if (password.trim() !== passwordVerification.trim()) return handleError({ type: 400, message: 'The password does not match.' })
 
-  const alreadyExists = await User.findOne({ $or: [{ email }, { name }] })
-  if (alreadyExists) return handleError({ type: 400, message: 'A user with the name name/email is already existing.' })
+  // const alreadyExists = await User.findOne({ $or: [{ email }, { name }] })
+  // if (alreadyExists) return handleError({ type: 400, message: 'A user with the name name/email is already existing.' })
 
   /* need to use bcrypt later */
   const crypted = sha256.x2(password)
+
+  // If email already exists create will fail because of unique index on email
   const user = await User.create({ name, email, password: crypted, adult })
 
   if (!user) return handleError({ type: 400, message: 'An error has occured.' })
@@ -39,8 +43,12 @@ export async function createUser (body: ICreateUser) {
  * sounds uploaded or maybe do a user purge at deletion?
  * @param userId string
  */
-export async function deleteUser (userId: string) {
+export async function deleteUser(userId: string, user) {
   try {
+
+    if (user.role !== 'admin' || user._id !== userId) throw new Error(403)
+
+    // do in one request
     const user = await User.findById(userId)
     if (!user) return handleError({ type: 400, message: 'There is no user with this identifier, aborting.' })
 
@@ -57,19 +65,15 @@ export async function deleteUser (userId: string) {
  *
  * @param userId
  */
-export async function getUserById (userId: string) {
-  try {
-    const user = await User.findById(userId)
-    if (!user) return handleError({ type: 400, message: 'An error has occured.' })
+export async function getUserById(userId: string) {
+  const user = await User.findById(userId).lean()
+  if (!user) throw new Error('my custom message')
 
-    user.set('email', undefined)
-    user.set('password', undefined)
-    user.set('credits', undefined)
+  delete user.email
+  delete user.password
+  delete user.credits
 
-    return handleError({ type: 200, message: JSON.stringify(user) })
-  } catch (err) {
-    return handleError({ type: 404, message: 'There is no user with this identifier, aborting.' })
-  }
+  return user
 }
 
 /**
@@ -77,23 +81,14 @@ export async function getUserById (userId: string) {
  * @param email
  * @param password
  */
-export async function login ({ email, password } : { email : string, password : string }) {
-  try {
-    const user = await User.findOne({ email })
-    if (!user) return handleError({ type: 404, message: 'There is no user found with this email, aborting.' })
+export async function login({ email, password }: { email: string, password: string }) {
+  // should be finished with token generation
+  // and more security and should use bcrypt!
+  // instead "sha256"
+  const crypted = sha256.x2(password)
+  const user = await User.findOne({ email, password: crypted }).lean()
+  if (!user) throw new Error('Password does not match.')
 
-    // should be finished with token generation
-    // and more security and should use bcrypt!
-    // instead "sha256"
-    const crypted = sha256.x2(password)
-
-    // @ts-ignore
-    if (user.password === crypted) {
-      return handleError({ type: 200, message: 'Login success.' })
-    } else {
-      return handleError({ type: 400, message: 'Password does not match.' })
-    }
-  } catch (err) {
-    return handleError({ type: 404, message: 'There is no user found with this email, aborting.' })
-  }
+  delete user.password
+  return user
 }

@@ -4,6 +4,7 @@ import bodyParser from 'koa-bodyparser'
 
 import { userRoutes, defaultRoutes, soundsRoutes } from './controllers/routesController'
 import { Database } from './controllers/databaseController'
+import { handleError } from './controllers/errorsController'
 
 const app = new Koa()
 const router = new Router()
@@ -16,7 +17,14 @@ database.connect('mongodb://localhost:27017/test')
 // need a better way to all routes
 for (const { method, uri, cb } of defaultRoutes) {
   // @ts-ignore
-  router[method](uri, cb)
+  router[method](uri, ctx => {
+    try {
+      return cb(ctx)
+    } catch (e) {
+      console.log(e)
+      return handleError({ type: 400, message: e.message })
+    }
+  })
 }
 
 for (const { method, uri, cb } of userRoutes) {
