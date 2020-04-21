@@ -9,6 +9,7 @@ const UserSchema = new Schema({
   adult: { type: Boolean, default: false }
 })
 
+UserSchema.index({ email: 1 }, { unique: true }) 
 const User = model('User', UserSchema)
 
 export default User
